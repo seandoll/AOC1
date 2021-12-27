@@ -3,41 +3,11 @@
 # Press ⌃R to execute it or replace it with your code.
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 import depth_data
+import power_consumptiom
+import submarine_day2_part_1
+from numpy import loadtxt
 
-
-class DepthTracker:
-    def __init__(self):
-        self.increase_count = 0
-        self.decrease_count = 0
-        self.unchanged_count = 0
-        self.current_reading = 0
-
-    def report_increase(self, reading):
-        print(str(reading) + " (increased)")
-        self.increase_count += 1
-
-    def report_decrease(self, reading):
-        print(str(reading) + " (decreased)")
-        self.decrease_count += 1
-
-    def report_unchanged(self, reading):
-        print(str(reading) + " (unchanged)")
-        self.unchanged_count += 1
-
-    def report_first_reading(self, reading):
-        print(str(reading) + " (N/A - no previous measurement)")
-
-    def analyse(self, current_reading):
-        if self.current_reading == 0:
-            self.report_first_reading(current_reading)
-        elif current_reading > self.current_reading:
-            self.report_increase(current_reading)
-        elif current_reading < self.current_reading:
-            self.report_decrease(current_reading)
-        else:
-            self.report_unchanged(current_reading)
-
-        self.current_reading = current_reading
+import submarine_day2_part_2
 
 
 def sum_3_readings():
@@ -51,19 +21,55 @@ def windows_to_process():
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    question = 2
-    depth_tracker = DepthTracker()
+    day = 3
+    part = 2
 
-    if question == 1:
-        for reading in depth_data.depth_readings:
-            depth_tracker.analyse(reading)
-    else:
-        depth_pointer = 0
-        while windows_to_process():
-            reading_sum = sum_3_readings()
-            depth_tracker.analyse(reading_sum)
-            depth_pointer += 1
+    if day == 1:
+        if part == 1:
+            sub = submarine_day2_part_1.Submarine()
+            for reading in depth_data.depth_readings:
+                sub.analyse(reading)
+        else:
+            depth_pointer = 0
+            sub = submarine_day2_part_1.Submarine()
+            while windows_to_process():
+                reading_sum = sum_3_readings()
+                sub.analyse(reading_sum)
+                depth_pointer += 1
+        print("Total number of increases = " + str(sub.increase_count))
+    elif day == 2:
+        # get data
+        if part == 1:
+            sub = submarine_day2_part_1.Submarine()
+        else:
+            sub = submarine_day2_part_2.Submarine()
 
-    print("Total number of increases = " + str(depth_tracker.increase_count))
+        data = loadtxt('day2_data', dtype='str')
+        # iterate data
+        for item in data:
+            sub.move(item)
+        print("Horizontal position multiplied by depth = " + str(sub.depth * sub.horizontal_position))
+    elif day == 3:
+        data = loadtxt('day3_data', dtype='str')
+        pc = power_consumptiom.PowerConsumption()
+        if part == 1:
+            gamma_binary_string = pc.gamma_rate_binary(data)
+            gamma = pc.decimal(gamma_binary_string)
+            epsilon_binary_string = power_consumptiom.epsilon_from_gamma(gamma_binary_string)
+            epsilon = pc.decimal(epsilon_binary_string)
+            print('Decimal value = ' + str(gamma * epsilon))
+        else:
+            rating = power_consumptiom.OxygenGeneratorRating()
+            print('Length data = ' + str(len(data)))
+            rating_string = pc.rating_string(data, rating)
+            oxygen_generator_reading = pc.decimal(rating_string)
+            rating = power_consumptiom.Co2ScrubberRating()
+            print('Length data = ' + str(len(data)))
+            rating_string = pc.rating_string(data, rating)
+            co2_generator_reading = pc.decimal(rating_string)
+            life_support_rating = oxygen_generator_reading * co2_generator_reading
+            print('life support rating = ' + str(life_support_rating))
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+
+
